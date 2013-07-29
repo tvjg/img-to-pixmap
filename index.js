@@ -1,1 +1,1 @@
-module.exports = require(__dirname + '/build/Debug/imgToPixmap.node');
+module.exports = require(__dirname + '/build/Release/imgToPixmap.node');

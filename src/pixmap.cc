@@ -2,16 +2,16 @@
 #define BUILDING_NODE_EXTENSION
 #endif
 
+#include <vector>
+#include <algorithm>
+#include <exception>
+
 #include <Magick++.h>
 #include <node.h>
 #include <node_buffer.h>
 
 using namespace v8;
 using namespace Magick;
-
-#include <list>
-#include <string.h>
-#include <exception>
 
 #define THROW_ERROR_EXCEPTION(x) ThrowException(v8::Exception::Error(String::New(x))); \
 scope.Close(Undefined())
@@ -25,7 +25,6 @@ scope.Close(Undefined())
 // }
 Handle<Value> ImgToPixmap(const Arguments& args) {
     HandleScope scope;
-    MagickCore::SetMagickResourceLimit(MagickCore::ThreadResource, 1);
 
     if ( args.Length() != 1 ) {
         return THROW_ERROR_EXCEPTION("imgToPixmap() requires a single options hash as an argument");
@@ -34,7 +33,6 @@ Handle<Value> ImgToPixmap(const Arguments& args) {
         return THROW_ERROR_EXCEPTION("imgToPixmap()'s argument should be an object");
     }
     Local<Object> obj = Local<Object>::Cast( args[ 0 ] );
-
     Local<Object> src = Local<Object>::Cast( obj->Get( String::NewSymbol("src") ) );
     
     bool noSrcGiven  = src->IsUndefined();
@@ -55,8 +53,8 @@ Handle<Value> ImgToPixmap(const Arguments& args) {
         String::Utf8Value srcStr( src->ToString() );
         image.read( std::string(*srcStr) );
       } else {
-        Magick::Blob srcBlob( node::Buffer::Data(src), node::Buffer::Length(src) );
-        image.read( srcBlob );
+        Magick::Blob srcBlob(node::Buffer::Data(src), node::Buffer::Length(src));
+        image.read(srcBlob);
       }
     }
     catch (std::exception& err) {
@@ -82,12 +80,12 @@ Handle<Value> ImgToPixmap(const Arguments& args) {
 
     const Magick::PixelPacket* pixels = image.getConstPixels(0, 0, width, height);
 
-    unsigned int pixBuffLength = width * height * 4;
+    size_t pixBuffLength = width * height * 4;
 
+    std::vector<unsigned char> retPixels(pixBuffLength);
     node::Buffer* retBuffer = node::Buffer::New( pixBuffLength );
-    unsigned char retPixels[pixBuffLength];
 
-    for (int i = 0; i < width * height; i++) { 
+    for (size_t i = 0; i < width * height; i++) { 
         unsigned int r = (int) pixels[i].red;
         unsigned int g = (int) pixels[i].green;
         unsigned int b = (int) pixels[i].blue;
@@ -100,20 +98,11 @@ Handle<Value> ImgToPixmap(const Arguments& args) {
         retPixels[(i*4)+3] = 255 - ((255 * a) / MaxRGB); // Magick inverts typical opacity scale
     }
 
-    //return scope.Close( False() );
-    memcpy( node::Buffer::Data( retBuffer ), retPixels, pixBuffLength );
-    //return scope.Close( retBuffer->handle_ );
-
-    //TODO: Should I bother converting SlowBuffer?
-    //Local<Object> globalObj = Context::GetCurrent()->Global();
-    //Local<Function> bufferConstructor = Local<Function>::Cast(globalObj->Get(String::New("Buffer")));
-    //Handle<Value> constructorArgs[3] = { retBuffer->handle_, v8::Integer::New(pixBuffLength), v8::Integer::New(0) };
-    //Local<Object> actualBuffer = bufferConstructor->NewInstance(3, constructorArgs);
+    std::copy(retPixels.begin(), retPixels.end(), node::Buffer::Data(retBuffer));
 
     Local<Object> retObj = Object::New();
     retObj->Set(String::NewSymbol("width"), Number::New(width));
     retObj->Set(String::NewSymbol("height"), Number::New(height));
-    //retObj->Set(String::NewSymbol("data"), actualBuffer);
     retObj->Set(String::NewSymbol("data"), retBuffer->handle_);
 
     return scope.Close(retObj);
