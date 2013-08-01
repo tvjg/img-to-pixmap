@@ -2,6 +2,7 @@
 #define BUILDING_NODE_EXTENSION
 #endif
 
+#include <iostream>
 #include <vector>
 #include <algorithm>
 #include <exception>
@@ -48,7 +49,6 @@ Handle<Value> ImgToPixmap(const Arguments& args) {
 
     Magick::Image image;
     try {
-      //TODO: This throws on libpng warning for iCCP profiles -- need to bypass
       if (srcIsString) {
         String::Utf8Value srcStr( src->ToString() );
         image.read( std::string(*srcStr) );
@@ -56,6 +56,9 @@ Handle<Value> ImgToPixmap(const Arguments& args) {
         Magick::Blob srcBlob(node::Buffer::Data(src), node::Buffer::Length(src));
         image.read(srcBlob);
       }
+    }
+    catch (Magick::Warning& err) {
+        std::cerr << "Warning: " << err.what() << "\n";
     }
     catch (std::exception& err) {
         std::string message = "image.read failed with error: ";
@@ -109,6 +112,8 @@ Handle<Value> ImgToPixmap(const Arguments& args) {
 }
 
 void Init(Handle<Object> exports, Handle<Object> module) {
+    InitializeMagick(NULL);
+
     module->Set(String::NewSymbol("exports"),
       FunctionTemplate::New(ImgToPixmap)->GetFunction());
 }

@@ -10,21 +10,21 @@
           'xcode_settings': {
             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
             'OTHER_CFLAGS': [
-              '<!@(Magick++-config --cflags)'
+              '<!@(GraphicsMagick++-config --cppflags)'
             ]
           },
           "libraries": [
-             '<!@(Magick++-config --ldflags --libs)',
+             '<!@(GraphicsMagick++-config --ldflags --libs)',
           ],
           'cflags': [
-            '<!@(Magick++-config --cflags --cppflags)'
+            '<!@(GraphicsMagick++-config --cppflags)'
           ],
         }], ['OS=="linux"', { # not windows not mac
           "libraries": [
-            '<!@(Magick++-config --ldflags --libs)',
+            '<!@(GraphicsMagick++-config --ldflags --libs)',
           ],
           'cflags': [
-            '<!@(Magick++-config --cflags --cppflags)'
+            '<!@(GraphicsMagick++-config --cppflags)'
           ],
         }]
       ]
