@@ -1,5 +1,16 @@
 {
   "name": "img-to-pixmap",
+  "description": "Dump raw RGBA pixel information using GraphicMagick",
+  "keywords": [
+    "imagemagick",
+    "graphicsmagick",
+    "magick++",
+    "pixmap",
+    "image",
+    "data",
+    "pixel",
+    "pixels"
+  ],
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
