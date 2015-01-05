@@ -11,8 +11,8 @@
     "pixel",
     "pixels"
   ],
-  "version": "0.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "engines": { "node": "0.10.x" },
   "main": "index.js",
   "directories": {
     "test": "test"
