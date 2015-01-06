@@ -13,15 +13,16 @@ Dump raw RGBA pixel data from images using
 ## Usage
 
     var imgToPixmap = require('img-to-pixmap');
-
     imgToPixmap({ src: './small-square.jpg' });
-
     // { height: 2, width: 2, data: <Buffer 00 00 00 ff ... > }
 
 ## Example
 
-    cd examples
+The included example dumps the pixel data from a [sample
+image](https://commons.wikimedia.org/wiki/Template:Potd/2005-03#mediaviewer/File:Flashlight.jpg)
+and prints an approximation to the terminal.
 
+    cd examples
     node index.js
 
 ![terminal flashlight](examples/flashlight-pxld.png)
@@ -76,9 +77,7 @@ Tested with GraphicsMagick 1.3.18 on ArchLinux.
 Make sure you can find Magick++-config in your PATH.  Then:
 
     git clone https://github.com/dirtyrottenscoundrel/img-to-pixmap
-
     cd img-to-pixmap
-
     npm install
 
 If you are on ArchLinux, you will likely need to pass the --python=python2 flag
