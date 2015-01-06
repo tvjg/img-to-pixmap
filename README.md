@@ -4,13 +4,27 @@ Dump raw RGBA pixel data from images using
 [GraphicsMagick](http://www.graphicsmagick.org/)'s
 [Magick++](http://www.graphicsmagick.org/Magick++/).
 
-## Example
+> When I originally wrote this,
+> [node-imagemagick-native](https://github.com/mash/node-imagemagick-native)
+> didn't expose `getConstPixels`. This code was cobbled together from there to
+> scratch an itch. It provides an interesting case study for building a native
+> Node module.
+
+## Usage
 
     var imgToPixmap = require('img-to-pixmap');
 
-    imgToPixmap({ src: './small-square.jpg' }); 
+    imgToPixmap({ src: './small-square.jpg' });
 
     // { height: 2, width: 2, data: <Buffer 00 00 00 ff ... > }
+
+## Example
+
+    cd examples
+
+    node index.js
+
+![terminal flashlight](examples/flashlight-pxld.png)
 
 ## API
 
@@ -20,9 +34,9 @@ Convert an image provided to `options.src` as a path to file or Buffer.
 
 The `options` argument can have following values:
 
-    { 
+    {
       srcData : required. string file path or Buffer with binary image data
-      format  : optional. one of http://www.imagemagick.org/script/formats.php ex: "JPEG" 
+      format  : optional. one of http://www.imagemagick.org/script/formats.php ex: "JPEG"
       debug   : optional. 1 or 0
     }
 
@@ -31,7 +45,7 @@ The method returns an object similar to:
     {
       width  : 3904,
       height : 2622,
-      data   : <Buffer 00 00 fe ff 00 ...> 
+      data   : <Buffer 00 00 fe ff 00 ...>
     }
 
 Pixel data is a Buffer packed with quartets of 8-bit RGBA data.
@@ -61,7 +75,11 @@ Tested with GraphicsMagick 1.3.18 on ArchLinux.
 
 Make sure you can find Magick++-config in your PATH.  Then:
 
-    npm install imagemagick-native
+    git clone https://github.com/dirtyrottenscoundrel/img-to-pixmap
+
+    cd img-to-pixmap
+
+    npm install
 
 If you are on ArchLinux, you will likely need to pass the --python=python2 flag
 to node-gyp since Arch now defaults to Python3.
