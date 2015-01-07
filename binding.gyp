@@ -3,11 +3,9 @@
     {
       "target_name": "imgToPixmap",
       "sources": [ "src/pixmap.cc" ],
-      'cflags!': [ '-fno-exceptions', '-fpermissive' ],
-      'cflags_cc!': [ '-fno-exceptions', '-fpermissive' ],
-      "include_dirs" : [
-        "<!(node -e \"require('nan')\")"
-      ],
+      'include_dirs': ['<!(node -e "require(\'nan\')")'],
+      'cflags_cc': [ '-fpermissive' ],
+      'cflags_cc!': [ '-fno-exceptions' ],
       "conditions": [
         ['OS=="mac"', {
           'xcode_settings': {
