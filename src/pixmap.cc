@@ -10,12 +10,9 @@
 #include <Magick++.h>
 #include <node.h>
 #include <node_buffer.h>
+#include "nan.h"
 
 using namespace v8;
-using namespace Magick;
-
-#define THROW_ERROR_EXCEPTION(x) ThrowException(v8::Exception::Error(String::New(x))); \
-scope.Close(Undefined())
 
 // input
 // args[ 0 ]: options. required, object with following key,values
@@ -24,32 +21,33 @@ scope.Close(Undefined())
 // format : optional. one of http://www.imagemagick.org/script/formats.php ex: "JPEG"
 // debug  : optional. 1 or 0
 // }
-Handle<Value> ImgToPixmap(const Arguments& args) {
-    HandleScope scope;
+NAN_METHOD(ImgToPixmap) {
+    NanScope();
 
     if ( args.Length() != 1 ) {
-        return THROW_ERROR_EXCEPTION("imgToPixmap() requires a single options hash as an argument");
+        return NanThrowError("imgToPixmap() requires a single options hash as an argument");
     }
     if ( ! args[ 0 ]->IsObject() ) {
-        return THROW_ERROR_EXCEPTION("imgToPixmap()'s argument should be an object");
+        return NanThrowError("imgToPixmap()'s argument should be an object");
     }
     Local<Object> obj = Local<Object>::Cast( args[ 0 ] );
-    Local<Object> src = Local<Object>::Cast( obj->Get( String::NewSymbol("src") ) );
+    Local<Object> src = Local<Object>::Cast( obj->Get( NanNew<String>("src") ) );
     
     bool noSrcGiven  = src->IsUndefined();
     bool srcIsString = !noSrcGiven && ( src->IsString() || src->IsStringObject() );
     bool srcIsBuffer = !noSrcGiven && node::Buffer::HasInstance(src);
 
     if (noSrcGiven || !(srcIsString || srcIsBuffer)) {
-        return THROW_ERROR_EXCEPTION("imgToPixmap()'s argument should have \"src\" containing either a String filepath or a Buffer instance");
+        return NanThrowError("imgToPixmap()'s argument should have \"src\" containing either a String filepath or a Buffer instance");
     }
 
-    int debug = obj->Get( String::NewSymbol("debug") )->Uint32Value();
+    int debug = obj->Get( NanNew<String>("debug") )->Uint32Value();
     if (debug) printf( "debug: on\n" );
 
     Magick::Image image;
     try {
       if (srcIsString) {
+        //TODO: Have another look at this
         String::Utf8Value srcStr( src->ToString() );
         image.read( std::string(*srcStr) );
       } else {
@@ -63,18 +61,19 @@ Handle<Value> ImgToPixmap(const Arguments& args) {
     catch (std::exception& err) {
         std::string message = "image.read failed with error: ";
         message += err.what();
-        return THROW_ERROR_EXCEPTION(message.c_str());
+        return NanThrowError(message.c_str());
     }
     catch (...) {
-        return THROW_ERROR_EXCEPTION("unhandled error");
+        return NanThrowError("unhandled error");
     }
 
-    int width  = (int) image.columns();
-    int height = (int) image.rows();
+    size_t width  = image.columns();
+    size_t height = image.rows();
 
-    if (debug) printf("width, height: %d, %d\n", width, height);
+    if (debug) printf("width, height: %zu, %zu\n", width, height);
 
-    Local<Value> formatValue = obj->Get( String::NewSymbol("format") );
+    Local<Value> formatValue = obj->Get( NanNew<String>("format") );
+    //TODO: Have another look at this
     String::AsciiValue format( formatValue->ToString() );
     if ( ! formatValue->IsUndefined() ) {
         if (debug) printf( "format: %s\n", *format );
@@ -103,18 +102,18 @@ Handle<Value> ImgToPixmap(const Arguments& args) {
 
     std::copy(retPixels.begin(), retPixels.end(), node::Buffer::Data(retBuffer));
 
-    Local<Object> retObj = Object::New();
-    retObj->Set(String::NewSymbol("width"), Number::New(width));
-    retObj->Set(String::NewSymbol("height"), Number::New(height));
-    retObj->Set(String::NewSymbol("data"), retBuffer->handle_);
+    Local<Object> retObj = NanNew<Object>();
+    retObj->Set(NanNew<String>("width"), NanNew<Number>(width));
+    retObj->Set(NanNew<String>("height"), NanNew<Number>(height));
+    retObj->Set(NanNew<String>("data"), retBuffer->handle_);
 
-    return scope.Close(retObj);
+    NanReturnValue(retObj);
 }
 
 void Init(Handle<Object> exports, Handle<Object> module) {
-    InitializeMagick(NULL);
+    Magick::InitializeMagick(NULL);
 
-    module->Set(String::NewSymbol("exports"),
+    module->Set(NanNew<String>("exports"),
       FunctionTemplate::New(ImgToPixmap)->GetFunction());
 }
 
