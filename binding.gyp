@@ -4,7 +4,7 @@
       "target_name": "imgToPixmap",
       "sources": [ "src/pixmap.cc" ],
       'include_dirs': ['<!(node -e "require(\'nan\')")'],
-      'cflags_cc': [ '-Wall' ],
+      'cflags_cc': [ '-Wall', '-fpermissive' ],
       'cflags_cc!': [ '-fno-exceptions' ],
       "conditions": [
         ['OS=="mac"', {
