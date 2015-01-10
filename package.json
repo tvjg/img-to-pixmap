@@ -25,7 +25,7 @@
   },
   "scripts": {
     "test": "tap test/*.test.js --tap --stderr",
-    "install": "node-gyp rebuild"
+    "install": "node-gyp rebuild -v"
   },
   "author": "John Guidry <lowdowndirtyrottenscoundrel@gmail.com>",
   "license": "BSD",
